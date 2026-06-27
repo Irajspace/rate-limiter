@@ -449,3 +449,38 @@ Observability: How do you set up metrics, logs, and alerts so you know before th
 Canary Deployments: If you are rolling out a brand-new rate-limiting rule, how do you deploy it to just 1% of users first to ensure it doesn't accidentally block legitimate traffic?
 
 ```
+
+## study about leafy-bucket
+```
+The Idea
+
+Imagine a bucket with a small hole at the bottom.
+
+Water = Incoming requests
+Bucket = Queue (buffer)
+Hole = Fixed processing rate
+           Requests
+        💧 💧 💧 💧 💧
+              ↓
+
+         +-----------+
+         |           |
+         |  Bucket   |
+         |           |
+         +-----------+
+               |
+               | 1 request/sec
+               ↓
+          Processed requests
+
+No matter how fast water is poured into the bucket, it leaks out at a constant rate.
+
+For API rate limiting (GitHub, Stripe, AWS APIs, etc.):
+
+✅ Token Bucket is more common because it allows short, legitimate bursts.
+
+For network traffic shaping (routers, switches):
+
+✅ Leaky Bucket is commonly used because it enforces a smooth, constant output rate.
+
+```
