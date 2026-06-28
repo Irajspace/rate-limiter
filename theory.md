@@ -22,11 +22,11 @@ Contrast with Business-Level Limiting: Business-level throttling requires lookin
 
 ```
 ## functional requirements
-![alt text](image.png)
-![alt text](image-1.png)
-![alt text](image-2.png)
+![alt text](images/image.png)
+![alt text](images/image-1.png)
+![alt text](images/image-2.png)
 ```
-When you build this in Go, this image tells you exactly what your struct definitions need to track. You won't be building database savers or analytics endpoints. Instead, you'll be writing middleware that extracts an API Key or IP from r.RemoteAddr or the Authorization header, checks it against an in-memory map or Redis instance, updates the count, and sets the w.Header().Set("X-RateLimit-Reset", ...) before returning http.StatusTooManyRequests.
+When you build this in Go, this images/image tells you exactly what your struct definitions need to track. You won't be building database savers or analytics endpoints. Instead, you'll be writing middleware that extracts an API Key or IP from r.RemoteAddr or the Authorization header, checks it against an in-memory map or Redis instance, updates the count, and sets the w.Header().Set("X-RateLimit-Reset", ...) before returning http.StatusTooManyRequests.
 API Key: This is the standard for developer-facing APIs (like Stripe or Twilio). Each developer gets a unique key, usually passed in an X-API-Key header, giving them their own isolated rate limit.
 
 ```
@@ -55,9 +55,9 @@ Your algorithm evaluates the state against the rules. If it passes, update the s
 ```
 
 ## mvp phase
-![alt text](image-3.png)
-![alt text](image-4.png)
-![alt text](image-5.png)
+![alt text](images/image-3.png)
+![alt text](images/image-4.png)
+![alt text](images/image-5.png)
 ```
 bad approach->
 Where it lives: In this design, the rate limiting logic is built directly into the application code of each individual server or microservice.
@@ -130,9 +130,9 @@ Global limits: A massive "kill switch" that protects your servers by ensuring th
 Endpoint-specific limits: Recognizing that some API calls are heavier than others. For example, doing a complex database search might be limited to 10 times a minute, while a simple profile update allows 100 times a minute.
 
 ```
-![alt text](image-6.png)
-![alt text](image-7.png)
-![alt text](image-8.png)
+![alt text](images/image-6.png)
+![alt text](images/image-7.png)
+![alt text](images/image-8.png)
 ## algorithms
 ```
 fixed counter algorithm->
@@ -191,7 +191,7 @@ Calculate (The Math): The Gateway looks at the current time, compares it to the 
 Update (The Write): The Gateway subtracts 1 token for the current request and saves the new balance and the new timestamp back to Redis using a MULTI/EXEC transaction block (which groups commands together). It also sets an EXPIRE flag so Redis automatically deletes Alice's data if she stops making requests for an hour, saving memory.
 
 3. The Fatal Flaw: The Race Condition
-The final image introduces a subtle but catastrophic bug in the logic above.
+The final images/image introduces a subtle but catastrophic bug in the logic above.
 Even though the write operation (MULTI/EXEC) is protected, the initial read operation (HMGET) is not. This creates a classic distributed systems Race Condition.
 
 Imagine Alice has exactly 1 token left.
@@ -329,7 +329,7 @@ Infrastructure Cost: You are literally doubling your database servers. If you ne
 Replication Lag: Because the synchronization is asynchronous (meaning the Master doesn't wait for the Replica to confirm it got the data before telling the API Gateway the request was successful), there is a tiny window of vulnerability. If the Master crashes the exact millisecond after updating a token, but before it sent that update to the Replica, that tiny sliver of data is lost during the failover.
 
 ```
-![alt text](image-11.png)
+![alt text](images/image-11.png)
 
 ## 3) How do we minimize latency overhead?
 ```
@@ -411,7 +411,7 @@ The Cons: High operational complexity. Maintaining thousands of persistent conne
 
 
 ```
-![alt text](image-12.png)
+![alt text](images/image-12.png)
 
 ## staff level vs senior
 ```
@@ -484,3 +484,5 @@ For network traffic shaping (routers, switches):
 ✅ Leaky Bucket is commonly used because it enforces a smooth, constant output rate.
 
 ```
+## revision
+![alt text](images/image-13.png)
